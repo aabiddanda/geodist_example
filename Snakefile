@@ -4,7 +4,7 @@
 import sys
 sys.path.append('src/')
 from reformat_plink_freq import  compute_freq_table, write_output_str
-
+from geodist_naive import gen_geodist
 
 
 ## ---------------- Variable Setup ----------------- ##
@@ -12,6 +12,8 @@ from reformat_plink_freq import  compute_freq_table, write_output_str
 input_vcf = 'data/vcf/test.vcf.gz'
 poplabels = 'params/poplists/indiv2pop.txt'
 poppanel = 'params/poplists/pop_order.txt'
+
+bins = "[0.0,0.05]"
 
 
 ## ------ Calculating Allele Frequency Table ------- ##
@@ -36,15 +38,27 @@ rule calc_af_table:
 
 
 ## --- Generating Geographic Distribution Codes ---- ##
-# rule calc_geodist_naive:
-#   input:
-#     rules.calculate_allele_frequency.output.freq_table
-#   output:
-#     geodist_tables
+rule calc_geodist_naive:
+  input:
+    freq_table = rules.calc_af_table.output.freq_table
+  output:
+    geodist_table = 'data/geodist_tbl/test.geodist.txt.gz'
+  run: 
+    gen_geodist(infile=input.freq_table, outfile=output.geodist_table, bins=bins)
 
-# rules count_geodist:
-#     input:
-#         rules.calc_geodist_naive.output.geodist_table
+rule count_geodist:
+  input:
+    rules.calc_geodist_naive.output.geodist_table
+  output:
+    geodist_cnt = 'data/geodist_cnts/test.geodist_cnts.txt.gz'
+  shell:
+    """
+    gzip -d -c {input} | awk \'NR > 1 {{counts[$6]++}} END{{for(i in counts){{print i,counts[i];}}}}\' | sort -n -k1,1 | gzip > {output.geodist_cnt}
+    """
+
+rule test:
+  input:
+    geodist_cnt = 'data/geodist_cnts/test.geodist_cnts.txt.gz' 
 
 ## -------- Generating GeoDist Plots --------------- ##
 # rules plot_geodist:

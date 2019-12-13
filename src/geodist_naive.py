@@ -46,7 +46,6 @@ def generate_codes(X, n_cats=4, n_pops=5):
   codes = np.array((X @ bases) + 1, dtype=int)
   return(codes)
 
-
 """
   Simply concatenate the categories 
 """
@@ -55,6 +54,26 @@ def concat_categories(X):
   codes = [''.join(row) for row in Y]
   return(codes)
 
+def gen_geodist(infile, outfile='test.geodist.txt.gz', bins="[0.0,0.05]"):
+  """ Computing the underlying geographic distribution """
+  bin_endpts = list(map(float, bins.strip('[]').split(',')))
+  bins = generate_bins(bin_endpts)
+  i = 0
+  with gz.open(outfile, 'wt') as out:
+    with gz.open(infile, 'rt') as f:
+      for line in f:
+        if i == 0:
+          spltln = line.split()
+          out.write('\t'.join(spltln[0:4] + ['ID']) + '\n')
+        else:
+          spltln = line.split()
+          if np.float32(spltln[4]) > 0.0:
+            freq_values = np.array(spltln[4:], dtype=np.float32)
+            # Generating the code
+            test_values = simple_geodist_binning(freq_values, bins=bins)
+            code = ''.join([str(i) for i in test_values])
+            out.write('\t'.join(spltln[0:4] + [code]) + '\n')
+        i += 1 
 
 @click.command()
 @click.option('--freqs', required=True, help='Minor allele count file')
