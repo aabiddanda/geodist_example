@@ -18,13 +18,13 @@ def compute_freq_table(freq_file, pop_labels, header=False, sep='\s+', mac='freq
       pop = line.split()[0]
       if pop not in pops:
         pops.append(pop)
+  print(pops)
   # reading in the actual frequency file
   str_acc = []
   with gz.open(freq_file, 'rt') as f:
     if header:
       next(f)
     out_str = '\t'.join(['CHR','SNP','A1','A2'] + pops)
-    print(out_str)
     str_acc.append(out_str)
     cur_k = None
     cur_pop_vec = ['0' for i in range(len(pops))]
@@ -37,31 +37,38 @@ def compute_freq_table(freq_file, pop_labels, header=False, sep='\s+', mac='freq
           cur_k = k
         else:
           s = '\t'.join(list(cur_k) + cur_pop_vec)
-          print(s)
           str_acc.append(s)
           cur_k = k
           cur_pop_vec = ['0' for i in range(len(pops))]
           i = pops.index(pop)
+          try:
+            if mac == 'mac':
+              cur_pop_vec[i] = '%s' % fields[6]
+            elif mac == 'total':
+              cur_pop_vec[i] = '%s' % fields[7]
+            else:
+              # calculating the frequency now 
+              cur_pop_vec[i] = '%s' % str(float(fields[6])/float(fields[7]))
+          except ZeroDivisionError:
+            cur_pop_vec[i] = '0'
+      else:
+        i = pops.index(pop)
+        try:
           if mac == 'mac':
             cur_pop_vec[i] = '%s' % fields[6]
           elif mac == 'total':
             cur_pop_vec[i] = '%s' % fields[7]
           else:
-            # calculating the frequency now 
-            cur_pop_vec[i] = '%s' % str(int(fields[6])/int(fields[7]))
-      else:
-        i = pops.index(pop)
-        if mac:
-          cur_pop_vec[i] = '%s' % fields[6]
-        else:
-          cur_pop_vec[i] = '%s' % fields[7]
-      # Return the list of strings
-      return(str_acc)
+            cur_pop_vec[i] = '%s' % str(float(fields[6])/float(fields[7]))
+        except ZeroDivisionError:
+          cur_pop_vec[i] = '0'
+  # Return the list of strings
+  return(str_acc)
 
-def write_output_str(str_acc, output, gzipped=True):
+def write_output_str(str_acc, outfile, gzipped=True):
   # concatenate the long list of strings
   if gzipped:
-    with gz.open(outfile, 'w') as out:
+    with gz.open(outfile, 'wt') as out:
       for i in str_acc:
         out.write(i + '\n')
   else:
