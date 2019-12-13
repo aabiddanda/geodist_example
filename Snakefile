@@ -56,12 +56,13 @@ rule count_geodist:
     gzip -d -c {input} | awk \'NR > 1 {{counts[$6]++}} END{{for(i in counts){{print i,counts[i];}}}}\' | sort -n -k1,1 | gzip > {output.geodist_cnt}
     """
 
-rule test:
+rule final_count_geodist:
   input:
-    geodist_cnt = 'data/geodist_cnts/test.geodist_cnts.txt.gz' 
+    'data/geodist_cnts/test.geodist_cnts.txt.gz'
 
 ## -------- Generating GeoDist Plots --------------- ##
-# rules plot_geodist:
-#     input:
-#         rules.count_geodist.output.geodist_cnt
-
+rules plot_geodist:
+  input:
+    rules.count_geodist.output.geodist_cnt
+  output:
+    geodist_plot = ''
