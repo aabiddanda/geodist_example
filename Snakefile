@@ -23,7 +23,8 @@ rule calc_af_table:
     tmp_vcf = temp('data/test.biallelic_snps.frq.vcf.gz'),
     plink_test = temp('data/test.strat.frq.strat.gz'),
   run:
-    prefix = 'data/test'
+    prefix = ''.join(input.vcf.split('.')[0:2])
+    print(prefix)
     shell('bcftools annotate --set-id \'%POS\' {input.vcf} | bcftools view -v snps -m2 -M2 | bgzip -@10 > {output.tmp_vcf}')
     shell('plink2 --vcf {output.tmp_vcf} --double-id --freq gz --within {input.pops} --out {prefix}')
     # Compute the allele frequency tables using built in functions
