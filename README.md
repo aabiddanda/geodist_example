@@ -1,24 +1,22 @@
 # geodist_example
 -------------------------------
 
-An example pipeline to generate "GeoDist" plots
+An example pipeline to generate "GeoDist"-style plots from a VCF
 
 ## Requirements
 
 ### Python Packages
 
+- snakemake
+- numpy
 
 ### External Software
 
-Many parts of the GeoDist pipeline  
+Many parts of the GeoDist pipeline use the following tools 
 
 1. `bcftools`
-
 2. `plink` (v1.9)
-
-
-
-
+3. `gzip`
 
 ## Contact
 
