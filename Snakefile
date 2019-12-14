@@ -1,17 +1,24 @@
 #python3
 
 ## ---------------- Import Functions --------------- ## 
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+mpl.use('agg')
+
+
+# importing custom libraries and functions
 import sys
 sys.path.append('src/')
 from reformat_plink_freq import  compute_freq_table, write_output_str
 from geodist_naive import gen_geodist
+from plot_geodist import GeoDistPlot
 
 
 ## ---------------- Variable Setup ----------------- ##
 # NOTE : these variables should be changed for any example dataset
 input_vcf = 'data/vcf/test.vcf.gz'
-poplabels = 'params/poplists/indiv2pop.txt'
-poppanel = 'params/poplists/pop_order.txt'
+pop_labels = 'params/poplists/indiv2pop.txt'
+pop_panel = 'params/poplists/pop_order.txt'
 
 bins = "[0.0,0.05]"
 
@@ -22,8 +29,8 @@ bins = "[0.0,0.05]"
 rule calc_af_table:
   input:
     vcf=input_vcf,
-    pops = poplabels,
-    poporder = poppanel
+    pops = pop_labels,
+    poporder = pop_panel
   output:
     tmp_vcf = temp('data/vcf/test.biallelic_snps.frq.vcf.gz'),
     plink_test = temp('data/vcf/test.frq.strat.gz'),
@@ -53,15 +60,31 @@ rule count_geodist:
     geodist_cnt = 'data/geodist_cnts/test.geodist_cnts.txt.gz'
   shell:
     """
-    gzip -d -c {input} | awk \'NR > 1 {{counts[$6]++}} END{{for(i in counts){{print i,counts[i];}}}}\' | sort -n -k1,1 | gzip > {output.geodist_cnt}
+    gzip -d -c {input} | awk \'NR > 1 {{counts[$5]++}} END{{for(i in counts){{print i,counts[i];}}}}\' | sort -n -k1,1 | gzip > {output.geodist_cnt}
     """
 
-rule test:
-  input:
-    geodist_cnt = 'data/geodist_cnts/test.geodist_cnts.txt.gz' 
-
 ## -------- Generating GeoDist Plots --------------- ##
-# rules plot_geodist:
-#     input:
-#         rules.count_geodist.output.geodist_cnt
+rule plot_geodist:
+  input:
+    geodist_cnt = rules.count_geodist.output.geodist_cnt,
+    pop_panel = pop_panel
+  output:
+    geodist_plot = 'plots/test.geodist.pdf'
+  run:
+    # NOTE : this will be changed based on the binning used...
+    cur_geodist = GeoDistPlot()
+    cur_geodist._add_text_data(input.geodist_cnt)
+    cur_geodist._add_poplabels(input.pop_panel)
+    cur_geodist._filter_data()
+    cur_geodist._add_cmap()
+    f, ax = plt.subplots(1,1,figsize=(4,8))
+    _, nsnps, _ = cur_geodist.plot_geodist(ax)
+    ax.set_yticks([0, 0.25,0.5,0.75,1.0])
+    ax.set_yticklabels(['0.0', '0.25', '0.5', '0.75', '1.0'], fontsize=cur_geodist.y_lbl_fontsize)
+    ax.set_xticklabels(cur_geodist.poplist, fontsize=cur_geodist.x_lbl_fontsize, rotation=90)
+    plt.savefig(output.geodist_plot, bbox_inches='tight')
 
+rule gen_final_plots:
+  """ Rule to generate final plots for a geodist dataset """
+  input:
+    'plots/test.geodist.pdf'

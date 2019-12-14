@@ -1,4 +1,5 @@
 data/plink_files/
 data/freq_table/
+plots/
 *.log
 *.nosex
