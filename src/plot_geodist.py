@@ -6,14 +6,12 @@ import matplotlib as mpl
 import matplotlib.font_manager as fm
 fm.findSystemFonts(fontpaths=['/home/abiddanda/.fonts/'], fontext='ttf')
 
-# TODO : this should be just changed to Arial without my absolute paths...
-prop = fm.FontProperties(fname='/home/abiddanda/.fonts/arial.ttf')
 mpl.rcParams['font.family'] = "Arial"
 mpl.rcParams['font.sans-serif'] = "Arial"
 plt.rc('font', family="Arial")
 mpl.font_manager._rebuild()
 
-import click
+# import click
 
 # Hex-Colors for GeoDist Mappings
 # Blues_HSL = [188,45,81]
@@ -271,49 +269,3 @@ class GeoDistPlot:
       prev = cum_frac[i]
     return(ax)
       
-
-@click.command()
-@click.option('--geodist_cnt', help='Geodist Categories File', required=True)
-@click.option('--pop_panel', help='Cluster Labels', required=True)
-@click.option('--max_freq', help='Minimal global minor allele frequency',type=float, default=0.001)
-@click.option('--rare', help='Upper or lower bound on variant filtering', type=bool, default=False)
-@click.option('--cmap_name', default='Blues')
-@click.option('--figsz_x', help='Figure width', type=float, default = 4)
-@click.option('--figsz_y', help='Figure width', type=float, default = 8)
-@click.option('--title', help='title', default = None)
-@click.option('--dpi', help='Output resolution', default=300)
-@click.option('--out', required=True, help='Output File (PNG, JPG, PDF)')
-def main(geodist_cnt, pop_panel, max_freq, rare, cmap_name, figsz_x, figsz_y, title, dpi, out):
-    #1.Creating the geodist object
-    cur_geodist = GeoDistPlot()
-    cur_geodist._add_data(geodist_cnt)
-    cur_geodist._add_poplabels(pop_panel)
-    cur_geodist._filter_data(max_freq=max_freq, rare=rare)
-    # TODO : this is what
-    if cur_geodist.ncat == 3:
-      cur_geodist._add_cmap(base_cmap=cmap_name)
-    else:
-      cur_geodist._add_cmap(base_cmap=cmap_name,
-                            str_labels=['U','R','L','C'],
-                            lbl_colors=['black','black','white','white'])
-    # Setting up the plot
-    f, ax = plt.subplots(1,2,figsize=(figsz_x*2, figsz_y))
-    _, nsnps, _ = cur_geodist.plot_geodist(ax[0])
-    ax[0].set_yticks([0, 0.25,0.5,0.75,1.0])
-    ax[0].set_yticklabels(['0.0', '0.25', '0.5', '0.75', '1.0'],fontsize=cur_geodist.y_lbl_fontsize)
-    ax[0].set_xticklabels(cur_geodist.poplist, fontsize=cur_geodist.x_lbl_fontsize, rotation=90)
-    ax[0].set_xlabel('Pop', fontsize=cur_geodist.x_lbl_fontsize)
-    # NOTE : this scaling is very adhoc...
-    cur_geodist.fontsize = 0.65*cur_geodist.fontsize
-    _ = cur_geodist.plot_percentages(ax[1])
-    ax[1].set_yticks([]);
-    ax[1].set_xticks([]);
-    ax[1].set_ylim(0,1);
-    f.suptitle('%s\n N = %d' % (title,nsnps), fontsize=cur_geodist.title_fontsize, y=1.05)
-    plt.tight_layout()
-    plt.savefig(out, dpi=dpi, bbox_inches='tight')
-    plt.close('all')
-
-
-if __name__ == '__main__':
-  main()

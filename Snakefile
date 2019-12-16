@@ -15,11 +15,12 @@ from plot_geodist import GeoDistPlot
 
 
 ## ---------------- Variable Setup ----------------- ##
-# NOTE : these variables should be changed for any example dataset
+# NOTE : these variables should be changed out for another example dataset
 input_vcf = 'data/vcf/test.vcf.gz'
 pop_labels = 'params/poplists/indiv2pop.txt'
 pop_panel = 'params/poplists/pop_order.txt'
 
+# NOTE : It is possible to change this as well.
 bins = "[0.0,0.05]"
 
 
@@ -82,6 +83,7 @@ rule plot_geodist:
     ax.set_yticks([0, 0.25,0.5,0.75,1.0])
     ax.set_yticklabels(['0.0', '0.25', '0.5', '0.75', '1.0'], fontsize=cur_geodist.y_lbl_fontsize)
     ax.set_xticklabels(cur_geodist.poplist, fontsize=cur_geodist.x_lbl_fontsize, rotation=90)
+    ax.set_ylabel(r'Proportion', fontsize=cur_geodist.y_lbl_fontsize*2)
     plt.savefig(output.geodist_plot, bbox_inches='tight')
 
 rule gen_final_plots:

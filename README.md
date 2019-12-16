@@ -9,6 +9,7 @@ An example pipeline to generate "GeoDist"-style plots from a VCF
 
 - snakemake
 - numpy
+- matplotlib
 
 ### External Software
 
