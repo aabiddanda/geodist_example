@@ -8,11 +8,19 @@ mpl.use('agg')
 
 # importing custom libraries and functions
 import sys
+import subprocess
 sys.path.append('src/')
 from reformat_plink_freq import  compute_freq_table, write_output_str
 from geodist_naive import gen_geodist
 from plot_geodist import GeoDistPlot
 
+
+## --------------- System Programs ----------------- ##
+bcftools_loc = subprocess.run(['which', 'bcftools'], stdout=subprocess.PIPE, universal_newlines=False)
+plink_loc =  subprocess.run(['which', 'plink2'], stdout=subprocess.PIPE, universal_newlines=False)
+
+BCFTOOLS = bcftools_loc.stdout.rstrip().decode('utf-8')
+PLINK = plink_loc.stdout.rstrip().decode('utf-8')
 
 ## ---------------- Variable Setup ----------------- ##
 # NOTE : these variables should be changed out for another example dataset
@@ -22,6 +30,8 @@ pop_panel = 'params/poplists/pop_order.txt'
 
 # NOTE : It is possible to change this as well.
 bins = "[0.0,0.05]"
+
+
 
 
 ## ------ Calculating Allele Frequency Table ------- ##
@@ -38,8 +48,8 @@ rule calc_af_table:
     freq_table = 'data/freq_table/test.freq.txt.gz'
   run:
     prefix = ''.join(input.vcf.split('.')[:-2])
-    shell('bcftools annotate --set-id \'%POS\' {input.vcf} | bcftools view -v snps -m2 -M2 | bgzip -@10 > {output.tmp_vcf}')
-    shell('plink2 --vcf {output.tmp_vcf} --double-id --freq gz --within {input.pops} --out {prefix}')
+    shell('{BCFTOOLS} annotate --set-id \'%POS\' {input.vcf} | bcftools view -v snps -m2 -M2 | bgzip -@10 > {output.tmp_vcf}')
+    shell('{PLINK} --vcf {output.tmp_vcf} --double-id --freq gz --within {input.pops} --out {prefix}')
     # Compute the allele frequency tables using built in functions
     str_acc = compute_freq_table(freq_file = output.plink_test, pop_labels=input.poporder, sep=None, header=True)
     write_output_str(str_acc, output.freq_table)
