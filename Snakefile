@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 mpl.use('agg')
 
-
 # importing custom libraries and functions
 import sys
 import subprocess
@@ -15,8 +14,9 @@ from geodist_naive import gen_geodist
 from plot_geodist import GeoDistPlot
 
 
-## --------------- System Programs ----------------- ##
+## --------------- System Program Locations ----------------- ##
 bcftools_loc = subprocess.run(['which', 'bcftools'], stdout=subprocess.PIPE, universal_newlines=False)
+# NOTE : check for just `plink` first 
 plink_loc =  subprocess.run(['which', 'plink2'], stdout=subprocess.PIPE, universal_newlines=False)
 
 BCFTOOLS = bcftools_loc.stdout.rstrip().decode('utf-8')
@@ -30,8 +30,6 @@ pop_panel = 'params/poplists/pop_order.txt'
 
 # NOTE : It is possible to change this as well.
 bins = "[0.0,0.05]"
-
-
 
 
 ## ------ Calculating Allele Frequency Table ------- ##
@@ -96,7 +94,8 @@ rule plot_geodist:
     ax.set_ylabel(r'Proportion', fontsize=cur_geodist.y_lbl_fontsize*2)
     plt.savefig(output.geodist_plot, bbox_inches='tight')
 
-rule gen_final_plots:
+# NOTE : This is the final rule
+rule test_final:
   """ Rule to generate final plots for a geodist dataset """
   input:
     'plots/test.geodist.pdf'
