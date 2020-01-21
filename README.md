@@ -25,6 +25,7 @@ Parts of the GeoDist pipeline use the following tools
 If installing on Mac OSX and using [homebrew](https://brew.sh/) it is possible to install all of the programs using:
 
 ```
+brew tap brewsci/science 
 brew install bcftools plink2 gzip awk
 ```
 
@@ -78,7 +79,6 @@ The allele frequency table (`data/freq_table/test.freq.txt.gz` after running the
 
 
 #### GeoDist Counts
-
 
 
 ## Contact
