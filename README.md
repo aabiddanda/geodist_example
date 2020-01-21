@@ -1,10 +1,9 @@
-# geodist_example
+# Geodist Example
 -------------------------------
 
 An example pipeline to generate "GeoDist"-style plots from a VCF
 
 ## Requirements
-
 ### Python Packages
 
 The following packages must be installed via `pip` or `pip3` 
@@ -51,7 +50,7 @@ snakemake test_final --dryrun
 
 This should list all of the steps in the pipeline to generate intermediate files and the eventual PDF plot. To actually run the pipeline, remove the `--dryrun` flag above. 
 
-After the pipeline has run, you should see the file `plots/test.geodist.pdf` as a resulting output. It should finish within 30 seconds. 
+After the pipeline has run, you should see the file `plots/test.geodist.pdf` as a resulting output. It should finish within 30 seconds. If you would like to rerun the pipeline use `snakemake -R test_final`.
 
 ## File Descriptions
 
@@ -63,7 +62,7 @@ The input VCF file should contain all of the individuals and variation that a us
 
 #### Population Labels
 
-The example file `params/poplists/indiv2pop.txt` is a three-column file that contains a single row for each individual of the VCF file
+The example file `params/poplists/indiv2pop.txt` is a three-column file that contains a single row for each individual of the VCF file. The first column is the individual ID, the second column is a family ID (which is not used) and the third column is the population label. 
 
 #### Population Panel (Population Order)
 
@@ -73,12 +72,28 @@ The example file `params/poplists/pop_order.txt` is a one-column file that shows
 
 #### Frequency Table
 
-The allele frequency table (`data/freq_table/test.freq.txt.gz` after running the pipeline)
+The allele frequency table (`data/freq_table/test.freq.txt.gz` after running the pipeline) is a table where the required columns are:
+
+ * `CHR` - chromosome ID
+ * `SNP` - SNP ID (typically position)
+ * `A1` - reference allele (or ancestral allele if VCF polarized)
+ * `A2` - alternative allele (or derived allele if VCF is polarized)
+
+After these four required columns, the following columns represent the frequency of the allele in each population (in this case `AFR`, `EUR`, `SAS`, `EAS`, `AMR`).
 
 #### GeoDist Table
 
+This table (`data/geodist_tbl/test.geodist.txt.gz` after running the pipeline) consists of the following five columns:
+
+* `CHR` - chromosome ID
+* `SNP` - SNP ID (typically position)
+* `A1` - reference allele (or ancestral allele if VCF polarized)
+* `A2` - alternative allele (or derived allele if VCF is polarized)
+* `ID` - the "code" reflecting the geographic distribution for genetic variants 
 
 #### GeoDist Counts
+
+This file (`data/geodist_cnts/test.geodist_cnts.txt.gz` ) is the final stage of intermediate data that we require before plotting. This two-column table (without headers) has a first column that is the "code" for the geographic distribution and the second column is the total number of variants falling into that category.
 
 
 ## Contact
